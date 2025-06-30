@@ -1,11 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import auth from "./routes/auth.js";
-import notFound from "./middleware/notFound.js";
-import errorHandler from "./middleware/errorHandler.js";
+import auth from "./src/routes/auth.js";
+import notFound from "./src/middleware/notFound.js";
+import errorHandler from "./src/middleware/errorHandler.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import connectDB from "./src/config/database.js";
 
 dotenv.config();
 
@@ -33,16 +34,18 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
-);  
+);
 
-// Start the server
+// Connect to DB and start server
+const startServer = async () => {
+  try {
+    await connectDB();
+    app.listen(port, () => {
+      console.log(`🚀 Server running on port ${port}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to start server:", error.message);
+  }
+};
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB connected"))
-  .catch((err) => console.error("❌ MongoDB connection error:", err));
+startServer();
