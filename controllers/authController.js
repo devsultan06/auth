@@ -52,7 +52,7 @@ export const login = async (req, res, next) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ accessToken, user: { name: user.name, email: user.email } });
