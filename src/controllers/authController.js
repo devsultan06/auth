@@ -52,7 +52,7 @@ export const login = async (req, res, next) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({ accessToken, user: { name: user.name, email: user.email } });
@@ -88,6 +88,21 @@ export const register = async (req, res, next) => {
     await User.create({ name, email, password: hashedPassword });
 
     res.status(201).json({ message: "User registered successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMe = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user).select("-password"); // exclude password
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    res.json(user);
   } catch (error) {
     next(error);
   }
